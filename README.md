@@ -37,6 +37,22 @@ Where:
 - $f_m$: Modulation frequency (2 MHz).
 - $f_c$: Carrier frequency (30-40 MHz).
 
+### System Block Diagram
+Below is the updated system block diagram for the Wireless Transmission Signal Simulation System:
+
+```mermaid
+graph TD
+    DC[直流信号] --> Adder[相加器]
+    Mod[调制信号] --> Adder[相加器]
+    Adder[相加器] --> Multiplier[乘法器]
+    Carrier[载波信号] --> Multiplier[乘法器]
+    Multiplier[乘法器] --> AM[AM信号]
+```
+
+This updated diagram illustrates the detailed flow of signal generation and processing:
+1. The DC signal and modulation signal are combined using an adder.
+2. The summed signal is multiplied with the carrier signal using a multiplier to synthesize the AM signal.
+
 ---
 
 # 无线传输信号模拟系统
@@ -77,3 +93,19 @@ $$
 - $A_m$：调制幅度。
 - $f_m$：调制频率（2 MHz）。
 - $f_c$：载波频率（30-40 MHz）。
+
+### 系统框图
+以下是无线传输信号模拟系统的系统框图：
+
+```mermaid
+graph TD
+    DC[直流信号] --> Adder[相加器]
+    Mod[调制信号] --> Adder[相加器]
+    Adder[相加器] --> Multiplier[乘法器]
+    Carrier[载波信号] --> Multiplier[乘法器]
+    Multiplier[乘法器] --> AM[AM信号]
+```
+
+该图说明了信号生成和处理的流程：
+1. 直流信号和调制信号通过相加器相加。
+2. 相加后的信号与载波信号通过乘法器相乘，合成AM信号。
