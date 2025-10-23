@@ -1,0 +1,242 @@
+C51 COMPILER V9.60.7.0   DDS9851                                                           10/23/2025 11:00:22 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE DDS9851
+OBJECT MODULE PLACED IN DDS9851.obj
+COMPILER INVOKED BY: D:\ARM\Keil_v5\C51\BIN\C51.EXE source\DDS9851.C LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\source) DEB
+                    -UG OBJECTEXTEND PRINT(.\DDS9851.lst) TABS(2) OBJECT(DDS9851.obj)
+
+line level    source
+
+   1          #include "DDS9851.H"
+   2          
+   3          //***************************************************//
+   4          //函数1:           ad9851_reset()                    //
+   5          //函数2:           ad9851_reset_serial()             //
+   6          //函数3:           ad9851_wr_parrel(unsigned char w0,double frequence)//
+   7          //函数4:           ad9851_wr_serial(unsigned char w0,double frequence)//
+   8          //版本:              V1.1                            //
+   9          //日期：             2008/12/19                      //
+  10          //修改日期：         2008/12/19                      //
+  11          //编写者：        xyc5208@163.com)            //
+  12          //***************************************************//
+  13          //                  子程序说明                       //
+  14          //***************************************************//
+  15          //函数1:  ad9851_reset()
+  16          //        复位ad9851，之后为并口写入模式        
+  17          //函数2:  ad9851_reset_serial()
+  18          //        复位ad9851，之后为串口写入模式
+  19          //函数3:  ad9851_wr_parrel(unsigned char w0,double frequence)
+  20          //        并口写ad9851数据，w0为ad9851中w0的数据，frequence
+  21          //        为写入的频率  
+  22          //函数4:  ad9851_wr_serial(unsigned char w0,double frequence)
+  23          //        串口写ad9851数据，w0为ad9851中w0的数据，frequence
+  24          //        为写入的频率  
+  25          //需定义的位：
+  26                   //ad9851_w_clk    ;
+  27                   //ad9851_fq_up    ;
+  28                   //ad9851_rest     ;
+  29                   //ad9851_bit_data ;
+  30          //例：
+  31                   //sbit ad9851_w_clk    =P2^2;
+  32                   //sbit ad9851_fq_up    =P2^1;
+  33                   //sbit ad9851_rest     =P2^0;
+  34                   //sbit ad9851_bit_data =P1^7;
+  35          //***************************************************//
+  36          //                 写数据说明                        //
+  37          //***************************************************//
+  38          //写数据例：
+  39          //       ad9851_reset()
+  40          //       wr_lcd02_data(unsigned char x)
+  41          //       ad9851_wr_parrel(0x01,1000)
+  42          //       ad9851_wr_serial(0x01,1000)
+  43          //***************************************************//
+  44          //---------------------------------------------------//
+  45          //                   程序                            //
+  46          //---------------------------------------------------//
+  47          
+  48          //***************************************************//
+  49          //              ad9851复位(并口模式)                 //
+  50          //---------------------------------------------------//
+  51          void ad9851_reset()
+  52          {
+  53   1      ad9851_w_clk=0;
+  54   1      ad9851_fq_up=0;
+C51 COMPILER V9.60.7.0   DDS9851                                                           10/23/2025 11:00:22 PAGE 2   
+
+  55   1      //rest信号
+  56   1      ad9851_rest=0;
+  57   1      ad9851_rest=1;
+  58   1      ad9851_rest=0;
+  59   1      }
+  60          //***************************************************//
+  61          //              ad9851复位(串口模式)                 //
+  62          //---------------------------------------------------//
+  63          void ad9851_reset_serial()
+  64          {
+  65   1      ad9851_w_clk=0;
+  66   1      ad9851_fq_up=0;
+  67   1      //rest信号
+  68   1      ad9851_rest=0;
+  69   1      ad9851_rest=1;
+  70   1      ad9851_rest=0;
+  71   1      //w_clk信号
+  72   1      ad9851_w_clk=0;
+  73   1      ad9851_w_clk=1;
+  74   1      ad9851_w_clk=0;
+  75   1      //fq_up信号
+  76   1      ad9851_fq_up=0;
+  77   1      ad9851_fq_up=1;
+  78   1      ad9851_fq_up=0;
+  79   1      }
+  80          //***************************************************//
+  81          //          向ad9851中写命令与数据(并口)             //
+  82          //---------------------------------------------------//
+  83          
+  84          void ad9851_wr_parrel(unsigned char w0,double frequence)
+  85          {
+  86   1      unsigned char w;
+  87   1      long int y;
+  88   1      double x;
+  89   1      //计算频率的HEX值
+  90   1      x=4294967295/180;//适合180M晶振/180为最终时钟频率（或30M六倍频）//修改为125M
+  91   1      //如果时钟频率不为180MHZ，修改该处的频率值，单位MHz ！！！
+  92   1      frequence=frequence/1000000;
+  93   1      frequence=frequence*x;
+  94   1      y=frequence;
+  95   1      //写w0数据
+  96   1      w=w0;   
+  97   1      D_DATA=w;      //w0
+  98   1      ad9851_w_clk=1;
+  99   1      ad9851_w_clk=0;
+ 100   1      //写w1数据
+ 101   1      w=(y>>24);
+ 102   1      D_DATA=w;      //w1
+ 103   1      ad9851_w_clk=1;
+ 104   1      ad9851_w_clk=0;
+ 105   1      //写w2数据
+ 106   1      w=(y>>16);
+ 107   1      D_DATA=w;      //w2
+ 108   1      ad9851_w_clk=1;
+ 109   1      ad9851_w_clk=0;
+ 110   1      //写w3数据
+ 111   1      w=(y>>8);
+ 112   1      D_DATA=w;      //w3
+ 113   1      ad9851_w_clk=1;
+ 114   1      ad9851_w_clk=0;
+ 115   1      //写w4数据
+ 116   1      w=(y>>=0);
+C51 COMPILER V9.60.7.0   DDS9851                                                           10/23/2025 11:00:22 PAGE 3   
+
+ 117   1      D_DATA=w;      //w4
+ 118   1      ad9851_w_clk=1;
+ 119   1      ad9851_w_clk=0;
+ 120   1      //移入始能
+ 121   1      ad9851_fq_up=1;
+ 122   1      ad9851_fq_up=0;
+ 123   1      }
+ 124          //***************************************************//
+ 125          //          向ad9851中写命令与数据(串口)             //
+ 126          //---------------------------------------------------//
+ 127          void ad9851_wr_serial(unsigned char w0,double frequence)
+ 128          {
+ 129   1      unsigned char i,w;
+ 130   1      long int y;
+ 131   1      double x;
+ 132   1      //计算频率的HEX值
+ 133   1      x=4294967295/180;//适合180M晶振/180为最终时钟频率（或30M六倍频）
+ 134   1      //如果时钟频率不为180MHZ，修改该处的频率值，单位MHz  ！！！
+ 135   1      frequence=frequence/1000000;
+ 136   1      frequence=frequence*x;
+ 137   1      y=frequence;
+ 138   1      //写w4数据
+ 139   1      w=(y>>=0);
+ 140   1      for(i=0;i<8;i++)
+ 141   1      {
+ 142   2      ad9851_bit_data=(w>>i)&0x01;
+ 143   2      ad9851_w_clk=1;
+ 144   2      ad9851_w_clk=0;
+ 145   2      }
+ 146   1      //写w3数据
+ 147   1      w=(y>>8);
+ 148   1      for(i=0;i<8;i++)
+ 149   1      {
+ 150   2      ad9851_bit_data=(w>>i)&0x01;
+ 151   2      ad9851_w_clk=1;
+ 152   2      ad9851_w_clk=0;
+ 153   2      }
+ 154   1      //写w2数据
+ 155   1      w=(y>>16);
+ 156   1      for(i=0;i<8;i++)
+ 157   1      {
+ 158   2      ad9851_bit_data=(w>>i)&0x01;
+ 159   2      ad9851_w_clk=1;
+ 160   2      ad9851_w_clk=0;
+ 161   2      }
+ 162   1      //写w1数据
+ 163   1      w=(y>>24);
+ 164   1      for(i=0;i<8;i++)
+ 165   1      {
+ 166   2      ad9851_bit_data=(w>>i)&0x01;
+ 167   2      ad9851_w_clk=1;
+ 168   2      ad9851_w_clk=0;
+ 169   2      }
+ 170   1      //写w0数据
+ 171   1      w=w0;   
+ 172   1      for(i=0;i<8;i++)
+ 173   1      {
+ 174   2      ad9851_bit_data=(w>>i)&0x01;
+ 175   2      ad9851_w_clk=1;
+ 176   2      ad9851_w_clk=0;
+ 177   2      }
+ 178   1      //移入始能
+C51 COMPILER V9.60.7.0   DDS9851                                                           10/23/2025 11:00:22 PAGE 4   
+
+ 179   1      ad9851_fq_up=1;
+ 180   1      ad9851_fq_up=0;
+ 181   1      }
+ 182          
+ 183          void ad9851_wr_phase_serial(unsigned int phase)
+ 184          {
+ 185   1          unsigned char i, w;
+ 186   1          unsigned int phase_word;
+ 187   1      
+ 188   1          // 计算相位字
+ 189   1          phase_word = phase & 0x3FFF; // 相位字是14位
+ 190   1      
+ 191   1          // 写相位字（低8位）
+ 192   1          w = phase_word & 0xFF;
+ 193   1          for (i = 0; i < 8; i++)
+ 194   1          {
+ 195   2              ad9851_bit_data = (w >> i) & 0x01;
+ 196   2              ad9851_w_clk = 1;
+ 197   2              ad9851_w_clk = 0;
+ 198   2          }
+ 199   1      
+ 200   1          // 写相位字（高6位）
+ 201   1          w = (phase_word >> 8) & 0x3F;
+ 202   1          for (i = 0; i < 6; i++)
+ 203   1          {
+ 204   2              ad9851_bit_data = (w >> i) & 0x01;
+ 205   2              ad9851_w_clk = 1;
+ 206   2              ad9851_w_clk = 0;
+ 207   2          }
+ 208   1      
+ 209   1          // 更新相位寄存器
+ 210   1          ad9851_fq_up = 1;
+ 211   1          ad9851_fq_up = 0;
+ 212   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    646    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      26
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

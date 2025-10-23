@@ -1,0 +1,175 @@
+C51 COMPILER V9.60.7.0   MAIN                                                              10/23/2025 11:00:22 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.obj
+COMPILER INVOKED BY: D:\ARM\Keil_v5\C51\BIN\C51.EXE source\main.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\source) DEBUG 
+                    -OBJECTEXTEND PRINT(.\main.lst) TABS(2) OBJECT(main.obj)
+
+line level    source
+
+   1          #include "STC12C5A60S2.H"
+   2          #include "stdio.h"
+   3          #include "DDS9851.H"
+   4          #include "bsp_seg.h"
+   5          #define KEY_MATRIX_PORT P1  //使用宏定义矩阵按键控制口
+   6          
+   7          unsigned char seg_string[10]; 
+   8          unsigned char seg_buf[8];
+   9          unsigned char pos = 0;  
+  10          unsigned char Key_Value = 0;
+  11          unsigned char Key_Down = 0;
+  12          unsigned char Key_Old = 0;
+  13          unsigned char Key_Up = 0;
+  14          unsigned char state_flag = 0;
+  15          
+  16          void Seg_Proc(void);
+  17          void Key_Proc(void);
+  18          
+  19          
+  20          u8 key_matrix_ranks_scan(void);
+  21          
+  22          double Fre = 40000000;
+  23          
+  24          void init(void)
+  25          {
+  26   1        P0=0x00;
+  27   1        P1=0x00;
+  28   1        P2=0x00;
+  29   1        P3=0xff;
+  30   1      }
+  31          void main()
+  32          {
+  33   1        init();
+  34   1        ad9851_wr_serial(0x01, Fre);  //0X00为不开六备频 0X01为开六备频
+  35   1        while(1)
+  36   1        {
+  37   2          ad9851_wr_serial(0x01, Fre);
+  38   2          //ad9851_wr_phase_serial(90);
+  39   2          Seg_Proc();
+  40   2          Key_Proc();
+  41   2        }
+  42   1      }
+  43          
+  44          
+  45          
+  46          void Seg_Proc()
+  47          {
+  48   1        switch(state_flag)
+  49   1        {
+  50   2          case 0x00:
+  51   2            sprintf(seg_string,"F-----%2d",(unsigned int)(Fre/1000000));
+  52   2          break;
+  53   2          case 0x02:
+  54   2            sprintf(seg_string , "----    ");
+C51 COMPILER V9.60.7.0   MAIN                                                              10/23/2025 11:00:22 PAGE 2   
+
+  55   2            break;
+  56   2          default:
+  57   2            sprintf(seg_string,"1243    ");
+  58   2            break;
+  59   2        }
+  60   1        Seg_Tran(seg_string,seg_buf);
+  61   1        Seg_Disp(seg_buf);
+  62   1      }
+  63          
+  64          void Key_Proc()
+  65          {
+  66   1        Key_Value = key_matrix_ranks_scan();
+  67   1        Key_Down = Key_Value&(Key_Value^Key_Old);
+  68   1        Key_Up = ~(Key_Value&(Key_Value^Key_Old));
+  69   1        Key_Old = Key_Value;
+  70   1        switch(Key_Down)
+  71   1        {
+  72   2          case 1:
+  73   2            Fre += 1000000;
+  74   2            break;
+  75   2          case 2:
+  76   2            Fre -= 1000000;
+  77   2            break;
+  78   2          case 3:
+  79   2            state_flag += 0x01;
+  80   2            break;
+  81   2          default:
+  82   2            break;
+  83   2          
+  84   2        }
+  85   1      }
+  86          u8 key_matrix_ranks_scan(void)
+  87          {
+  88   1        u8 key_value=0;
+  89   1      
+  90   1        KEY_MATRIX_PORT=0xf7;//给第一列赋值0，其余全为1
+  91   1        if(KEY_MATRIX_PORT!=0xf7)//判断第一列按键是否按下
+  92   1        {
+  93   2          delay_10us(1000);//消抖
+  94   2          switch(KEY_MATRIX_PORT)//保存第一列按键按下后的键值 
+  95   2          {
+  96   3            case 0x77: key_value=1;break;
+  97   3            case 0xb7: key_value=5;break;
+  98   3            case 0xd7: key_value=9;break;
+  99   3            case 0xe7: key_value=13;break;
+ 100   3          }
+ 101   2        }
+ 102   1        while(KEY_MATRIX_PORT!=0xf7);//等待按键松开 
+ 103   1        
+ 104   1        KEY_MATRIX_PORT=0xfb;//给第二列赋值0，其余全为1
+ 105   1        if(KEY_MATRIX_PORT!=0xfb)//判断第二列按键是否按下
+ 106   1        {
+ 107   2          delay_10us(1000);//消抖
+ 108   2          switch(KEY_MATRIX_PORT)//保存第二列按键按下后的键值 
+ 109   2          {
+ 110   3            case 0x7b: key_value=2;break;
+ 111   3            case 0xbb: key_value=6;break;
+ 112   3            case 0xdb: key_value=10;break;
+ 113   3            case 0xeb: key_value=14;break;
+ 114   3          }
+ 115   2        }
+ 116   1        while(KEY_MATRIX_PORT!=0xfb);//等待按键松开 
+C51 COMPILER V9.60.7.0   MAIN                                                              10/23/2025 11:00:22 PAGE 3   
+
+ 117   1        
+ 118   1        KEY_MATRIX_PORT=0xfd;//给第三列赋值0，其余全为1
+ 119   1        if(KEY_MATRIX_PORT!=0xfd)//判断第三列按键是否按下
+ 120   1        {
+ 121   2          delay_10us(1000);//消抖
+ 122   2          switch(KEY_MATRIX_PORT)//保存第三列按键按下后的键值 
+ 123   2          {
+ 124   3            case 0x7d: key_value=3;break;
+ 125   3            case 0xbd: key_value=7;break;
+ 126   3            case 0xdd: key_value=11;break;
+ 127   3            case 0xed: key_value=15;break;
+ 128   3          }
+ 129   2        }
+ 130   1        while(KEY_MATRIX_PORT!=0xfd);//等待按键松开 
+ 131   1        
+ 132   1        KEY_MATRIX_PORT=0xfe;//给第四列赋值0，其余全为1
+ 133   1        if(KEY_MATRIX_PORT!=0xfe)//判断第四列按键是否按下
+ 134   1        {
+ 135   2          delay_10us(1000);//消抖
+ 136   2          switch(KEY_MATRIX_PORT)//保存第四列按键按下后的键值 
+ 137   2          {
+ 138   3            case 0x7e: key_value=4;break;
+ 139   3            case 0xbe: key_value=8;break;
+ 140   3            case 0xde: key_value=12;break;
+ 141   3            case 0xee: key_value=16;break;
+ 142   3          }
+ 143   2        }
+ 144   1        while(KEY_MATRIX_PORT!=0xfe);//等待按键松开
+ 145   1        
+ 146   1        return key_value;   
+ 147   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    602    ----
+   CONSTANT SIZE    =     28    ----
+   XDATA SIZE       =     28       1
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
