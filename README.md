@@ -42,11 +42,11 @@ Below is the updated system block diagram for the Wireless Transmission Signal S
 
 ```mermaid
 graph TD
-    DC[直流信号] --> Adder[相加器]
-    Mod[调制信号] --> Adder[相加器]
-    Adder[相加器] --> Multiplier[乘法器]
-    Carrier[载波信号] --> Multiplier[乘法器]
-    Multiplier[乘法器] --> AM[AM信号]
+    DC[DC Signal] --> Adder[Adder]
+    Mod[Modulation Signal] --> Adder[Adder]
+    Adder[Adder] --> Multiplier[Multiplier]
+    Carrier[Carrier Signal] --> Multiplier[Multiplier]
+    Multiplier[Multiplier] --> AM[AM Signal]
 ```
 
 This updated diagram illustrates the detailed flow of signal generation and processing:
